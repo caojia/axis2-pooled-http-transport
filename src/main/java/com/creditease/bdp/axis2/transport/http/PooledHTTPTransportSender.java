@@ -85,6 +85,7 @@ public class PooledHTTPTransportSender extends AbstractHandler implements
 
     // NOTE: Added by CJ
     private int maxConnectionsPerHost = com.creditease.bdp.axis2.transport.http.Constants.DEFAULT_MAX_CONNECTIONS_PER_HOST;
+    private int maxConnectionsTotal = com.creditease.bdp.axis2.transport.http.Constants.DEFAULT_MAX_CONNECTIONS_TOTAL;
 
     public void cleanup(MessageContext msgContext) throws AxisFault {
         HttpMethod httpMethod = (HttpMethod) msgContext.getProperty(HTTPConstants.HTTP_METHOD);
@@ -161,6 +162,14 @@ public class PooledHTTPTransportSender extends AbstractHandler implements
                         getValue());
             }
 
+            Parameter maxConnectionsTotalParam = transportOut.
+                    getParameter(com.creditease.bdp.axis2.transport.http.Constants.MAX_CONNECTIONS_TOTAL);
+
+            if (maxConnectionsTotalParam != null) {
+                maxConnectionsTotal = Integer.parseInt((String) maxConnectionsTotalParam.
+                        getValue());
+            }
+
         } catch (NumberFormatException nfe) {
             // If there's a problem log it and use the default values
             log.error("Invalid maxConnectionsPerHost value format: not a number", nfe);
@@ -193,8 +202,6 @@ public class PooledHTTPTransportSender extends AbstractHandler implements
             // set the timeout properties
             Parameter soTimeoutParam = transportOut.getParameter(HTTPConstants.SO_TIMEOUT);
             Parameter connTimeoutParam = transportOut.getParameter(HTTPConstants.CONNECTION_TIMEOUT);
-            // NOTE: added by CJ
-            Parameter maxConnectionsPerHostParam = transportOut.getParameter(com.creditease.bdp.axis2.transport.http.Constants.MAX_CONNECTIONS_PER_HOST);
 
             // set the property values only if they are not set by the user explicitly
             if ((soTimeoutParam != null) &&
@@ -209,11 +216,19 @@ public class PooledHTTPTransportSender extends AbstractHandler implements
                         new Integer((String) connTimeoutParam.getValue()));
             }
 
-            // NOTE: Added by CJ
+            // NOTE: added by CJ
+            Parameter maxConnectionsPerHostParam = transportOut.getParameter(com.creditease.bdp.axis2.transport.http.Constants.MAX_CONNECTIONS_PER_HOST);
+            Parameter maxConnectionsTotalParam = transportOut.getParameter(com.creditease.bdp.axis2.transport.http.Constants.MAX_CONNECTIONS_TOTAL);
             if ((maxConnectionsPerHostParam != null) &&
                     (msgContext.getProperty(com.creditease.bdp.axis2.transport.http.Constants.MAX_CONNECTIONS_PER_HOST) == null)) {
                 msgContext.setProperty(com.creditease.bdp.axis2.transport.http.Constants.MAX_CONNECTIONS_PER_HOST,
                         new Integer((String) maxConnectionsPerHostParam.getValue()));
+            }
+
+            if ((maxConnectionsTotalParam != null) &&
+                    (msgContext.getProperty(com.creditease.bdp.axis2.transport.http.Constants.MAX_CONNECTIONS_TOTAL) == null)) {
+                msgContext.setProperty(com.creditease.bdp.axis2.transport.http.Constants.MAX_CONNECTIONS_TOTAL,
+                        new Integer((String) maxConnectionsTotalParam.getValue()));
             }
 
             //if a parameter has set been set, we will omit the SOAP action for SOAP 1.2

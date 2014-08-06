@@ -78,9 +78,15 @@ public class HTTPSender extends org.apache.axis2.transport.http.HTTPSender {
                         connManager = new MultiThreadedHttpConnectionManager();
                         // NOTE: Added by CJ
                         Integer maxConnectionPerHostConf = (Integer) msgContext.getProperty(Constants.MAX_CONNECTIONS_PER_HOST);
-                        if (maxConnectionPerHostConf != null) {
+                        Integer maxConnectionTotalConf = (Integer) msgContext.getProperty(Constants.MAX_CONNECTIONS_TOTAL);
+                        if (maxConnectionPerHostConf != null || maxConnectionTotalConf != null) {
                             HttpConnectionManagerParams param = new HttpConnectionManagerParams();
-                            param.setDefaultMaxConnectionsPerHost(maxConnectionPerHostConf);
+                            if (maxConnectionPerHostConf != null) {
+                                param.setDefaultMaxConnectionsPerHost(maxConnectionPerHostConf);
+                            }
+                            if (maxConnectionTotalConf != null) {
+                                param.setMaxTotalConnections(maxConnectionTotalConf);
+                            }
                             connManager.setParams(param);
                         }
                         configContext.setProperty(
